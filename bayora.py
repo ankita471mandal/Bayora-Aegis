@@ -1,30 +1,4 @@
 #!/usr/bin/env python3
-"""
-Bayora-Aegis: Secure Adversarial AI Safety Testing Infrastructure (prototype)
-Hack in Hills '26 - Problem 04
-
-Pure Python 3.9+ standard library. No installs needed.
-
-    python bayora.py demo           # end-to-end red/blue/model evaluation
-    python bayora.py test           # full test suite (isolation, audit, leakage...)
-    python bayora.py threat-model   # threat model + residual risk report
-    python bayora.py emit-compose   # writes hardened docker-compose.yml
-
-Architecture
-------------
-Red, Blue and the client LLM never talk to each other. Every interaction goes
-through ONE trusted Gateway ("Sandbox") that enforces:
-  1. Capability tokens (HMAC-signed, tenant-bound, expiring, revocable)
-  2. A policy engine (defense in depth: token AND policy must both allow)
-  3. A network flow matrix (no direct red<->blue<->model edges)
-  4. Commit-reveal for red payloads (blue sees them only after conclusion)
-  5. Declarative blue defenses (data, not code -> cannot exfiltrate)
-  6. Uniform verdicts + fixed latency slots (no decision/timing side channel)
-  7. Per-session model contexts, destroyed after every call (no KV/context bleed)
-  8. Per-tenant quotas (fairness, anti-DoS)
-  9. Tamper-evident audit log (SHA-256 hash chain + HMAC + external anchor)
- 10. Metadata-only anomaly monitor (never sees payload content)
-"""
 import argparse
 import base64
 import copy
@@ -47,9 +21,6 @@ DECLINE = "I can't help with that request."
 GENESIS = "0" * 64
 
 
-# --------------------------------------------------------------------------- #
-# Errors and helpers
-# --------------------------------------------------------------------------- #
 class SecurityError(Exception):
     pass
 
@@ -88,9 +59,7 @@ def b64d(s: str) -> str:
     return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4)).decode()
 
 
-# --------------------------------------------------------------------------- #
-# 4. Tamper-evident audit log
-# --------------------------------------------------------------------------- #
+
 class AuditLog:
     """Hash chain (publicly verifiable) + HMAC signature (authenticity).
     Stores only digests of details, so the log itself cannot leak payloads."""
@@ -144,9 +113,7 @@ class AuditLog:
         return True, "ok"
 
 
-# --------------------------------------------------------------------------- #
-# 3. Capability tokens + policy engine
-# --------------------------------------------------------------------------- #
+
 class CapabilityAuthority:
     def __init__(self, key: bytes):
         self._k = key
