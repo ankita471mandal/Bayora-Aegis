@@ -199,9 +199,7 @@ class Monitor:
             dq.clear()
 
 
-# --------------------------------------------------------------------------- #
-# Blue defense: DECLARATIVE (data, not code) so it cannot exfiltrate anything
-# --------------------------------------------------------------------------- #
+
 @dataclass
 class Defense:
     name: str
